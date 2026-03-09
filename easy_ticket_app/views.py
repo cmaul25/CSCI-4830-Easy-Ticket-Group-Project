@@ -1,9 +1,10 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
+#pull information from models.py
 from .models import Ticket, Comment, Category, Priority, Status
 
 
-# View all tickets
+#Display all tickets, with most recent appearing first
 @login_required
 def ticket_list(request):
     tickets = Ticket.objects.all().order_by('-created_at')
@@ -13,7 +14,7 @@ def ticket_list(request):
     })
 
 
-# View tickets assigned to the logged-in user
+#Display tickets assigned to the signed-in user only
 @login_required
 def my_tickets(request):
     tickets = Ticket.objects.filter(
@@ -25,7 +26,7 @@ def my_tickets(request):
     })
 
 
-# View tickets by status (example: Open, Closed)
+#Display tickets by current status (open, closed, work in progress, etc)
 @login_required
 def tickets_by_status(request, status_name):
     tickets = Ticket.objects.filter(
@@ -38,7 +39,7 @@ def tickets_by_status(request, status_name):
     })
 
 
-# View a single ticket with comments
+#View a specific ticket, pulling information about attached comments
 @login_required
 def ticket_detail(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -50,7 +51,7 @@ def ticket_detail(request, ticket_id):
     })
 
 
-# Create a new ticket
+#Create a new ticket by gathering information such as category, priority, status, etc
 @login_required
 def create_ticket(request):
     if request.method == "POST":
@@ -83,7 +84,7 @@ def create_ticket(request):
     })
 
 
-# Add a comment to a ticket
+#Creates a comment tied to a specific ticket
 @login_required
 def add_comment(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
