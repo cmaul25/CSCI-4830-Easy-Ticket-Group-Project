@@ -1,0 +1,55 @@
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    background: #f5f7fa;
+}
+
+/* Navbar */
+.navbar {
+    background: #1e3a8a;
+    color: white;
+    padding: 15px 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.btn {
+    padding: 10px 15px;
+    margin-left: 10px;
+    background: #3b82f6;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+}
+
+.btn:hover {
+    background: #2563eb;
+}
+
+.primary {
+    background: #10b981;
+}
+
+.secondary {
+    background: #f59e0b;
+}
+
+/* Hero */
+.hero {
+    text-align: center;
+    padding: 50px;
+}
+
+/* Tickets */
+.tickets {
+    padding: 30px;
+}
+
+.ticket-card {
+    background: white;
+    padding: 20px;
+    margin-bottom: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
