@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<head>
+    <!--set the encoding-->
+    <meta charset="UTF-8">
+    <!--helps with varying screen size format-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!--title in tab-->
+    <title>Easy Ticket Login</title>
+    <!--place the linked file beneath this comment-ish (for sebastian or whoever)-->
+    
+    <!--^^^^^^^^^-->
+</head>
+<body>
+    <!--make the container-->
+    <main id="main-holder">
+        <!--title on screen-->
+        <h1 id="login-header">Easy Ticket Login</h1>
+        <!--error message for failed log in-->
+        <div id="login-error-msg-holder">
+             <p style="color:#D30000;font-weight:bold" id="login-error-msg">
+                Incorrect username <span id="error-msg-second-line">or password</span>
+            </p>
+        </div>
+        <!--login-->
+        <form id="login-form" method="POST" action="/login">
+          
+            <!--username box input handling(labeling, input format, all that)-->
+            <label for="username-field">Username</label>
+            <input 
+                type="text"
+                name="username" 
+                id="username-field"
+                placeholder="Username"
+                required
+                style="margin-bottom: 10px;"<br>
+            <br><!--line break to make it look nicer-->
+            
+            <!--same as above but for password, has password type so its hidden-->
+            <label for="password-field">Password</label>
+            <input
+                type="password"
+                name="password"
+                id="password-field"
+                placeholder="Password"
+                required
+                style="margin-bottom: 10px;"
+            >
+            <!--container for the buttons-->
+            <div class="button-row">
+              <!--login button creation
+                <button type="submit" name="action" value="login" id="login-form-submit">
+                    Login
+                </button>
+                <!--sign up button creation-->
+                <button type="submit" name="action" value="signup" id="sign-up-form-submit">
+                    Sign Up
+                </button>
+            
+            </div>
+
+        </form>
+    </main>
+
+</body>
+</html>
