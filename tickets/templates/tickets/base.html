@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Easy Ticket</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; background: #f4f7fb; color: #222; }
+        nav { background: #173b63; color: white; padding: 14px 24px; display: flex; gap: 16px; align-items: center; }
+        nav a { color: white; text-decoration: none; font-weight: bold; }
+        .spacer { flex: 1; }
+        .container { max-width: 1000px; margin: 24px auto; padding: 0 16px; }
+        .card { background: white; border-radius: 10px; padding: 20px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); margin-bottom: 20px; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        input, textarea, select { width: 100%; padding: 10px; margin-top: 6px; margin-bottom: 14px; border: 1px solid #cfd8e3; border-radius: 8px; box-sizing: border-box; }
+        button { background: #173b63; color: white; border: none; padding: 10px 16px; border-radius: 8px; cursor: pointer; }
+        button.danger { background: #b42318; }
+        .muted { color: #666; }
+        .messages { list-style: none; padding: 0; }
+        .messages li { background: #e7f3ff; padding: 12px; border-radius: 8px; margin-bottom: 10px; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { text-align: left; padding: 12px; border-bottom: 1px solid #e5e7eb; }
+        .status-open { color: #0550ae; font-weight: bold; }
+        .status-in_progress { color: #9a6700; font-weight: bold; }
+        .status-closed { color: #1a7f37; font-weight: bold; }
+        .actions { display: flex; gap: 10px; align-items: center; }
+        @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+    <nav>
+        <a href="{% url 'ticket-list' %}">Tickets</a>
+        <a href="{% url 'account' %}">Account</a>
+        <div class="spacer"></div>
+        {% if request.user.is_authenticated %}
+            <span>{{ request.user.username }}</span>
+            <a href="{% url 'logout' %}">Logout</a>
+        {% endif %}
+    </nav>
+    <div class="container">
+        {% if messages %}
+            <ul class="messages">
+                {% for message in messages %}
+                    <li>{{ message }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+        {% block content %}{% endblock %}
+    </div>
+</body>
+</html>

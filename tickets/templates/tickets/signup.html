@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Easy Ticket</title>
+    <style>
+        body { font-family: Arial, sans-serif; background: #f4f7fb; }
+        .box { max-width: 420px; margin: 80px auto; background: white; padding: 24px; border-radius: 10px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); }
+        input { width: 100%; padding: 10px; margin: 8px 0 14px; box-sizing: border-box; }
+        button { background: #173b63; color: white; border: none; padding: 10px 16px; border-radius: 8px; }
+        .errorlist, .messages { color: #b42318; }
+    </style>
+</head>
+<body>
+    <div class="box">
+        <h1>Create Account</h1>
+        {% if messages %}
+            {% for message in messages %}<p>{{ message }}</p>{% endfor %}
+        {% endif %}
+        <form method="post">
+            {% csrf_token %}
+            <label for="username">Username</label>
+            <input id="username" name="username" required>
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password" required>
+            <button type="submit">Create Account</button>
+        </form>
+        <p><a href="{% url 'login' %}">Back to login</a></p>
+    </div>
+</body>
+</html>
