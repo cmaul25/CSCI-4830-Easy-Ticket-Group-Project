@@ -1,6 +1,9 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
+from django.contrib.auth import authenticate, login
+from django.contrib.auth.models import User
+
 
 # pull information from models.py
 from .models import Ticket, Comment, Category, Priority, Status
@@ -25,6 +28,34 @@ mock_tickets = [
         "created_at": datetime(2026, 3, 27, 14, 5)
     }
 ]
+
+# Login and signup page
+def login_signup(request):
+    error_message = None
+
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+        action = request.POST.get("action") # action is login button or signup button
+
+        if action == "login":
+            user = authenticate(request, username=username, password=password)
+
+            if user is not None:
+                login(request, user)
+                return redirect("home")
+            else:
+                error_message = "Incorrect username or password"
+
+        elif action == "signup":
+            if User.objects.filter(username=username).exists():
+                error_message = "Account already exists"
+            else:
+                user = User.objects.create_user(username=username, password=password)
+                login(request, user)
+                return redirect("home")
+            
+    return render(request, "login.html", {"error": error_message})
 
 # Homepage with newest tickets first
 def home(request):
