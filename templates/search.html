@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!--title in the browser-->
+    <title>Search Tickets</title>
+</head>
+<body>
+<!--title on the page itself-->
+<h1>Search Tickets</h1>
+<!--search format-->
+<form method="GET">
+    <!--text box input for searching w/ keyword-->
+    <input type="text" 
+           name="q" 
+           placeholder="Search tickets..."
+           value="{{ query|default:'' }}">
+           <!--post-search, keep the value in the box-->
+    <!--creates the dropdown filter (filters off status)-->
+    <select name="status">
+        <option value="All">All</option>
+        <!--loop and find all different types of "status-->
+        {% for status in statuses %}
+            <option value="{{ status.name }}"
+                {% if selected_status == status.name %}selected{% endif %}>
+                {{ status.name }}
+            </option>
+        {% endfor %}
+    </select>
+
+    <!--submit button-->
+    <button type="submit">Search</button>
+</form>
+<hr>
+<!--searched tickets section-->
+<h2>Tickets:</h2>
+<!--table to hold and display-->
+<table border="1" cellpadding="8">
+
+    <!--headers of the columns for the table-->
+    <tr>
+        <th>ID</th>
+        <th>Title</th>
+        <th>Status</th>
+        <th>Created By</th>
+        <th>Assigned To</th>
+        <th>Open</th>
+    </tr>
+    <!--loop tickets acquired from search-->
+    {% for ticket in tickets %}
+    <tr>
+        <!--but basic info stored on each ticket in each box-->
+        <td>{{ ticket.id }}</td>
+        <td>{{ ticket.title }}</td>
+        <td>{{ ticket.status.name }}</td>
+        <td>{{ ticket.created_by }}</td>
+        <td>{{ ticket.assigned_to }}</td>
+        <!--link to the full tickets details-->
+        <td>
+            <a href="{% url 'ticket_detail' ticket.id %}">
+                View Ticket
+            </a>
+        </td>
+    </tr>
+    <!--If no tickets match, no results-->
+    {% empty %}
+    <tr>
+        <td colspan="6">No results found</td>
+    </tr>
+    {% endfor %}
+
+</table>
+
+</body>
+</html>
