@@ -1,10 +1,48 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
-#pull information from models.py
+from datetime import datetime
+
+# pull information from models.py
 from .models import Ticket, Comment, Category, Priority, Status
 
+mock_tickets = [
+    {
+        "id": 1,
+        "title": "Computer not turning on",
+        "description": "Power button does nothing",
+        "created_at": datetime(2026, 3, 28, 10, 30)
+    },
+    {
+        "id": 2,
+        "title": "WiFi not working",
+        "description": "Cannot connect to network",
+        "created_at": datetime(2026, 3, 29, 9, 15)
+    },
+    {
+        "id": 3,
+        "title": "Blue screen error",
+        "description": "System crashes randomly",
+        "created_at": datetime(2026, 3, 27, 14, 5)
+    }
+]
 
-#Display all tickets, with most recent appearing first
+# Homepage with newest tickets first
+def home(request):
+    sorted_tickets = sorted(mock_tickets, key=lambda x: x["created_at"], reverse=True)
+    return render(request, "home.html", {"tickets": sorted_tickets})
+
+
+# Placeholder search page
+def search(request):
+    return render(request, "search.html")
+
+
+# Placeholder all tickets page (UI only)
+def view_tickets_page(request):
+    return render(request, "tickets.html")
+
+
+# Display all tickets, with most recent appearing first
 @login_required
 def ticket_list(request):
     tickets = Ticket.objects.all().order_by('-created_at')
@@ -14,7 +52,7 @@ def ticket_list(request):
     })
 
 
-#Display tickets assigned to the signed-in user only
+# Display tickets assigned to the signed-in user only
 @login_required
 def my_tickets(request):
     tickets = Ticket.objects.filter(
@@ -26,7 +64,7 @@ def my_tickets(request):
     })
 
 
-#Display tickets by current status (open, closed, work in progress, etc)
+# Display tickets by current status (open, closed, work in progress, etc)
 @login_required
 def tickets_by_status(request, status_name):
     tickets = Ticket.objects.filter(
@@ -39,7 +77,7 @@ def tickets_by_status(request, status_name):
     })
 
 
-#View a specific ticket, pulling information about attached comments
+# View a specific ticket, pulling information about attached comments
 @login_required
 def ticket_detail(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
@@ -51,7 +89,7 @@ def ticket_detail(request, ticket_id):
     })
 
 
-#Create a new ticket by gathering information such as category, priority, status, etc
+# Create a new ticket by gathering information such as category, priority, status, etc
 @login_required
 def create_ticket(request):
     if request.method == "POST":
@@ -84,7 +122,7 @@ def create_ticket(request):
     })
 
 
-#Creates a comment tied to a specific ticket
+# Creates a comment tied to a specific ticket
 @login_required
 def add_comment(request, ticket_id):
     ticket = get_object_or_404(Ticket, id=ticket_id)
