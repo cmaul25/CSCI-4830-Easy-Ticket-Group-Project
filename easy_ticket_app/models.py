@@ -1,4 +1,5 @@
 from django.db import models
+from django.contrib.auth.models import User
 '''
 Database structure of Easy Ticket: any new ticket is given each of 7 facts, such as a: Catagory(type of ticket), 
 Priority level, status of ticket(open, closed, etc), comments attached, attachments, and who the ticket is from.
