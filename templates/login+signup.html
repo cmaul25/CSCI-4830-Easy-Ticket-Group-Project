@@ -1,4 +1,5 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
     <!--set the encoding-->
     <meta charset="UTF-8">
@@ -16,14 +17,16 @@
         <!--title on screen-->
         <h1 id="login-header">Easy Ticket Login</h1>
         <!--error message for failed log in-->
+        {% if error %}
         <div id="login-error-msg-holder">
-             <p style="color:#D30000;font-weight:bold" id="login-error-msg">
-                Incorrect username <span id="error-msg-second-line">or password</span>
+             <p style="color:#D30000;font-weight:bold">
+                 {{error}}
             </p>
         </div>
+        {% endif %}
         <!--login-->
-        <form id="login-form" method="POST" action="/login">
-          
+        <form id="login-form" method="POST" action="{% url 'login' %}">
+            {% csrf_token %}
             <!--username box input handling(labeling, input format, all that)-->
             <label for="username-field">Username</label>
             <input 
@@ -32,7 +35,9 @@
                 id="username-field"
                 placeholder="Username"
                 required
-                style="margin-bottom: 10px;"<br>
+                style="margin-bottom: 10px;"
+                >
+                <br>
             <br><!--line break to make it look nicer-->
             
             <!--same as above but for password, has password type so its hidden-->
@@ -47,7 +52,7 @@
             >
             <!--container for the buttons-->
             <div class="button-row">
-              <!--login button creation
+              <!--login button creation-->
                 <button type="submit" name="action" value="login" id="login-form-submit">
                     Login
                 </button>
