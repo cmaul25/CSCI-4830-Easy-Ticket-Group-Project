@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth.decorators import login_required
 from datetime import datetime
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import User
 
 
@@ -168,3 +168,38 @@ def add_comment(request, ticket_id):
         )
 
     return redirect("ticket_detail", ticket_id=ticket.id)
+
+
+def login_signup_page(request):
+    #check for submission before hand
+    if request.method == "POST":
+        #wait for button press
+        action = request.POST.get("action")
+        #grab input from fields and boxes
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        if action == "login":
+            #if the user and password match, log in and send user to home
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect("home")
+            else:
+                #if the credentials DONT match, say incorrect
+                return render(request, "login+signup.html", {
+                    "error": "Incorrect username or password"
+                })
+
+        elif action == "signup":
+            #if user alr exists, error out
+            if User.objects.filter(username=username).exists():
+                return render(request, "login+signup.html", {
+                    "error": "Username already exists"
+                })
+            #if it doesnt, make a new user, log in and go to home
+            user = User.objects.create_user(username=username, password=password)
+            login(request, user)
+            return redirect("home")
+    #if page access outside of signup, send there anyways
+    return render(request, "login+signup.html")
