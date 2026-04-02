@@ -1,9 +1,10 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Easy Ticket System</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 <body>
 
@@ -11,25 +12,25 @@
     <nav class="navbar">
         <h1>💻 Easy Ticket System</h1>
         <div class="nav-buttons">
-            <a href="{{ url_for('search') }}" class="btn">Search</a>
-            <a href="{{ url_for('view_tickets') }}" class="btn">View Tickets</a>
+            <a href="{% url 'search' %}" class="btn">Search</a>
+            <a href="{% url 'ticket_list' %}" class="btn">View Tickets</a>
         </div>
     </nav>
 
     <!-- Hero Section -->
     <section class="hero">
         <h2>Welcome to the Computer Support Ticket System</h2>
-        <p>Submit and track IT issues بسهولة</p>
+        <p>Submit and track IT issues</p>
 
         <div class="hero-buttons">
-            <a href="{{ url_for('search') }}" class="btn primary">🔍 Go to Search</a>
-            <a href="{{ url_for('view_tickets') }}" class="btn secondary">📋 View Tickets</a>
+            <a href="{% url 'search' %}" class="btn primary">🔍 Go to Search</a>
+            <a href="{% url 'ticket_list' %}" class="btn secondary">📋 View Tickets</a>
         </div>
     </section>
 
     <!-- Recent Tickets -->
     <section class="tickets">
-        <h2>🆕 Most Recent Tickets</h2>
+        <h2>🆕 Most Recent Tickets</h2>   
 
         {% if tickets %}
             {% for ticket in tickets %}
