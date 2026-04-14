@@ -1,55 +1,139 @@
 body {
     font-family: Arial, sans-serif;
     margin: 0;
-    background: #f5f7fa;
+    background: #f4f7fb;
+    color: #222;
 }
 
-/* Navbar */
 .navbar {
-    background: #1e3a8a;
+    background: #173b63;
     color: white;
-    padding: 15px 30px;
+    padding: 14px 24px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    gap: 16px;
+}
+
+.brand {
+    font-size: 1.4rem;
+    font-weight: bold;
+}
+
+.nav-buttons {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
 }
 
 .btn {
+    display: inline-block;
     padding: 10px 15px;
-    margin-left: 10px;
-    background: #3b82f6;
+    background: #173b63;
     color: white;
     text-decoration: none;
-    border-radius: 6px;
+    border-radius: 8px;
+    font-weight: bold;
 }
 
 .btn:hover {
-    background: #2563eb;
+    opacity: 0.92;
 }
 
 .primary {
-    background: #10b981;
+    background: #173b63;
 }
 
 .secondary {
-    background: #f59e0b;
+    background: #355f8a;
 }
 
-/* Hero */
+.page-wrap {
+    max-width: 1100px;
+    margin: 24px auto;
+    padding: 0 16px;
+}
+
 .hero {
-    text-align: center;
-    padding: 50px;
+    padding-top: 0;
 }
 
-/* Tickets */
-.tickets {
-    padding: 30px;
-}
-
+.hero-card,
+.section-card,
 .ticket-card {
     background: white;
+    border-radius: 10px;
     padding: 20px;
-    margin-bottom: 15px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 20px;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 12px;
+    margin-top: 16px;
+    flex-wrap: wrap;
+}
+
+.tickets {
+    padding-top: 0;
+}
+
+.ticket-card h3,
+.section-card h1,
+.section-card h2,
+.hero-card h1 {
+    margin-top: 0;
+}
+
+.muted {
+    color: #666;
+}
+
+input, textarea, select {
+    width: 100%;
+    padding: 10px;
+    margin-top: 6px;
+    margin-bottom: 14px;
+    border: 1px solid #cfd8e3;
     border-radius: 8px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-sizing: border-box;
+}
+
+button {
+    background: #173b63;
+    color: white;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+th, td {
+    text-align: left;
+    padding: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.status-open { color: #0550ae; font-weight: bold; }
+.status-in_progress { color: #9a6700; font-weight: bold; }
+.status-closed { color: #1a7f37; font-weight: bold; }
+
+.search-layout {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+}
+
+@media (max-width: 800px) {
+    .navbar {
+        align-items: flex-start;
+        flex-direction: column;
+    }
 }

@@ -1,74 +1,76 @@
+{% load static %}
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <!--title in the browser-->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Tickets</title>
+    <link rel="stylesheet" href="{% static 'style.css' %}">
 </head>
 <body>
-<!--title on the page itself-->
-<h1>Search Tickets</h1>
-<!--search format-->
-<form method="GET">
-    <!--text box input for searching w/ keyword-->
-    <input type="text" 
-           name="q" 
-           placeholder="Search tickets..."
-           value="{{ query|default:'' }}">
-           <!--post-search, keep the value in the box-->
-    <!--creates the dropdown filter (filters off status)-->
-    <select name="status">
-        <option value="All">All</option>
-        <!--loop and find all different types of "status-->
-        {% for status in statuses %}
-            <option value="{{ status.name }}"
-                {% if selected_status == status.name %}selected{% endif %}>
-                {{ status.name }}
-            </option>
-        {% endfor %}
-    </select>
+    <nav class="navbar">
+        <div class="brand">Easy Ticket System</div>
+        <div class="nav-buttons">
+            <a href="{% url 'home' %}" class="btn">Home</a>
+            <a href="{% url 'search' %}" class="btn">Search</a>
+            <a href="{% url 'ticket_list' %}" class="btn">View Tickets</a>
+            <a href="{% url 'account' %}" class="btn">Account</a>
+            <a href="{% url 'logout' %}" class="btn">Logout</a>
+        </div>
+    </nav>
 
-    <!--submit button-->
-    <button type="submit">Search</button>
-</form>
-<hr>
-<!--searched tickets section-->
-<h2>Tickets:</h2>
-<!--table to hold and display-->
-<table border="1" cellpadding="8">
+    <main class="page-wrap">
+        <div class="search-layout">
+            <section class="section-card">
+                <h1>Search Tickets</h1>
+                <p class="muted">Search by keyword or filter by ticket status.</p>
+                <form method="GET">
+                    <label for="q">Search</label>
+                    <input id="q" type="text" name="q" placeholder="Search tickets..." value="{{ query|default:'' }}">
 
-    <!--headers of the columns for the table-->
-    <tr>
-        <th>ID</th>
-        <th>Title</th>
-        <th>Status</th>
-        <th>Created By</th>
-        <th>Assigned To</th>
-        <th>Open</th>
-    </tr>
-    <!--loop tickets acquired from search-->
-    {% for ticket in tickets %}
-    <tr>
-        <!--but basic info stored on each ticket in each box-->
-        <td>{{ ticket.id }}</td>
-        <td>{{ ticket.title }}</td>
-        <td>{{ ticket.status.name }}</td>
-        <td>{{ ticket.created_by }}</td>
-        <td>{{ ticket.assigned_to }}</td>
-        <!--link to the full tickets details-->
-        <td>
-            <a href="{% url 'ticket_detail' ticket.id %}">
-                View Ticket
-            </a>
-        </td>
-    </tr>
-    <!--If no tickets match, no results-->
-    {% empty %}
-    <tr>
-        <td colspan="6">No results found</td>
-    </tr>
-    {% endfor %}
+                    <label for="status">Status</label>
+                    <select name="status" id="status">
+                        <option value="All">All</option>
+                        {% for status in statuses %}
+                            <option value="{{ status.name }}" {% if selected_status == status.name %}selected{% endif %}>{{ status.label }}</option>
+                        {% endfor %}
+                    </select>
+                    <button type="submit">Search</button>
+                </form>
+            </section>
+        </div>
 
-</table>
-
+        <section class="section-card">
+            <h2>Results</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>Title</th>
+                        <th>Status</th>
+                        <th>Created By</th>
+                        <th>Assigned To</th>
+                        <th>Open</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ticket in tickets %}
+                    <tr>
+                        <td>{{ ticket.id }}</td>
+                        <td>{{ ticket.title }}</td>
+                        <td class="status-{{ ticket.status }}">{{ ticket.get_status_display }}</td>
+                        <td>{{ ticket.created_by }}</td>
+                        <td>{{ ticket.assigned_to|default:'Unassigned' }}</td>
+                        <td><a href="{% url 'ticket_detail' ticket.id %}">View Ticket</a></td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6">No results found</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
+    </main>
 </body>
 </html>
