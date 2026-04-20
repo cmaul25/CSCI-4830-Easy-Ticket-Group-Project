@@ -18,21 +18,62 @@ def _is_admin(user):
 
 
 def home(request):
-    if request.user.is_authenticated:
-        return redirect('ticket_list')
-    return redirect('login')
+    if not request.user.is_authenticated:
+        return redirect('login')
+
+    recent_tickets = Ticket.objects.select_related('created_by', 'assigned_to').order_by('-created_at')[:5]
+    return render(request, 'tickets/home.html', {'tickets': recent_tickets})
 
 
 def login_view(request):
     if request.user.is_authenticated:
-        return redirect('ticket_list')
+        return redirect('home')
 
-    form = AuthenticationForm(request, data=request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        login(request, form.get_user())
-        return redirect('ticket_list')
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+        action = request.POST.get('action')
 
-    return render(request, 'tickets/login.html', {'form': form})
+        if not username or not password:
+            error = 'Username and password are required.'
+        elif action == 'login':
+            from django.contrib.auth import authenticate
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('home')
+            error = 'Incorrect username or password.'
+
+    return render(request, 'tickets/login.html', {'error': error})
+
+
+@login_required
+def search(request):
+    query = (request.GET.get('q') or '').strip()
+    selected_status = (request.GET.get('status') or '').strip()
+
+    if _is_admin(request.user):
+        tickets = Ticket.objects.select_related('created_by', 'assigned_to').all().order_by('-created_at')
+    else:
+        tickets = Ticket.objects.select_related('created_by', 'assigned_to').filter(
+            Q(created_by=request.user) | Q(assigned_to=request.user)
+        ).order_by('-created_at')
+
+    if query:
+        tickets = tickets.filter(
+            Q(title__icontains=query) | Q(description__icontains=query)
+        ).order_by('-created_at')
+    if selected_status and selected_status != 'All':
+        tickets = tickets.filter(status=selected_status)
+
+    statuses = [{'name': value, 'label': label} for value, label in Ticket.STATUS_CHOICES]
+    return render(request, 'tickets/search.html', {
+        'tickets': tickets,
+        'query': query,
+        'selected_status': selected_status,
+        'statuses': statuses,
+    })
 
 
 @login_required

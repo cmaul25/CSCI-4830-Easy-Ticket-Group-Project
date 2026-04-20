@@ -1,0 +1,29 @@
+{% extends 'tickets/base.html' %}
+
+{% block content %}
+<section class="card">
+    <h1>Welcome to the Computer Support Ticket System</h1>
+    <p class="muted">Submit and track IT issues through the Easy Ticket dashboard.</p>
+    <div style="display: flex; gap: 12px; margin-top: 16px;">
+        <a href="{% url 'search' %}"><button type="button">Go to Search</button></a>
+        <a href="{% url 'ticket_list' %}"><button type="button">View Tickets</button></a>
+    </div>
+</section>
+
+<section class="card">
+    <h2>Most Recent Tickets</h2>
+    {% if tickets %}
+        {% for ticket in tickets %}
+            <div style="border-bottom: 1px solid #e5e7eb; padding: 12px 0;">
+                <h3 style="margin: 0;">{{ ticket.title }}</h3>
+                <p style="margin: 4px 0;">{{ ticket.description }}</p>
+                <small class="muted">Created: {{ ticket.created_at }}</small><br>
+                <small class="muted">Status: {{ ticket.get_status_display }}</small><br>
+                <a href="{% url 'ticket_detail' ticket.id %}" style="color: #173b63;">View Ticket</a>
+            </div>
+        {% endfor %}
+    {% else %}
+        <p class="muted">No tickets available.</p>
+    {% endif %}
+</section>
+{% endblock %}
