@@ -2,7 +2,20 @@ from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from django.db import transaction
 
-from .models import Ticket, TicketUpdate
+from .models import Ticket, TicketUpdate, UserProfile
+
+
+def create_user_account(*, username: str, password: str, role: str) -> User:
+    if not username or not username.strip():
+        raise ValidationError("Username is required.")
+    if not password:
+        raise ValidationError("Password is required.")
+    if User.objects.filter(username=username.strip()).exists():
+        raise ValidationError(f"Username '{username.strip()}' is already taken.")
+    user = User.objects.create_user(username=username.strip(), password=password)
+    user.profile.role = role
+    user.profile.save()
+    return user
 
 
 # -------- Ticket CRUD --------
