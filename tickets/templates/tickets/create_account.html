@@ -1,0 +1,23 @@
+{% extends 'tickets/base.html' %}
+
+{% block content %}
+<div class="card" style="max-width: 500px; margin: 0 auto;">
+    <h1>Create New Account</h1>
+    <p class="muted">Create a new user or admin account. The user can update their password after logging in.</p>
+
+    {% if messages %}
+        <ul class="messages">
+            {% for message in messages %}
+                <li>{{ message }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create Account</button>
+        <a href="{% url 'account' %}" style="margin-left: 12px; color: #173b63;">Cancel</a>
+    </form>
+</div>
+{% endblock %}

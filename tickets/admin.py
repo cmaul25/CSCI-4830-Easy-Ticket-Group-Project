@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Ticket, TicketUpdate
+from .models import Ticket, TicketUpdate, UserProfile
 
 
 class TicketUpdateInline(admin.TabularInline):
@@ -20,3 +20,10 @@ class TicketAdmin(admin.ModelAdmin):
 class TicketUpdateAdmin(admin.ModelAdmin):
     list_display = ('ticket', 'updated_by', 'timestamp')
     search_fields = ('ticket__title', 'update_text', 'updated_by__username')
+
+
+@admin.register(UserProfile)
+class UserProfileAdmin(admin.ModelAdmin):
+    list_display = ('user', 'role')
+    list_filter = ('role',)
+    search_fields = ('user__username',)

@@ -1,7 +1,13 @@
 from django import forms
 from django.contrib.auth.models import User
 
-from .models import Ticket, TicketUpdate
+from .models import Ticket, TicketUpdate, UserProfile
+
+
+class CreateAccountForm(forms.Form):
+    username = forms.CharField(max_length=150)
+    password = forms.CharField(widget=forms.PasswordInput)
+    role = forms.ChoiceField(choices=UserProfile.ROLE_CHOICES)
 
 
 class TicketCreateForm(forms.ModelForm):

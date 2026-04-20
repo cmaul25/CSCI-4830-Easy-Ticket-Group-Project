@@ -2,54 +2,133 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
-from .forms import AccountForm, TicketCreateForm, TicketEditForm, TicketUpdateForm
+from .forms import AccountForm, CreateAccountForm, TicketCreateForm, TicketEditForm, TicketUpdateForm
 from .models import Ticket
-from .services import add_ticket_update, create_ticket, delete_ticket, list_tickets, update_ticket
+from .services import add_ticket_update, create_ticket, create_user_account, delete_ticket, list_tickets, update_ticket
+
+
+def _is_admin(user):
+    return hasattr(user, 'profile') and user.profile.is_admin
 
 
 def home(request):
-    if request.user.is_authenticated:
-        return redirect('ticket_list')
-    return redirect('login')
+    if not request.user.is_authenticated:
+        return redirect('login')
 
+    if _is_admin(request.user):
+        tickets = Ticket.objects.all()
+        open_count = tickets.filter(status='open').count()
+        in_progress_count = tickets.filter(status='in_progress').count()
+        closed_count = tickets.filter(status='closed').count()
+        total_count = tickets.count()
+        from django.contrib.auth.models import User
+        total_users = User.objects.count()
+        stats = {
+            'open': open_count,
+            'in_progress': in_progress_count,
+            'closed': closed_count,
+            'total': total_count,
+            'total_users': total_users,
+        }
+    else:
+        tickets = Ticket.objects.filter(
+            Q(created_by=request.user) | Q(assigned_to=request.user)
+        )
+        open_count = tickets.filter(status='open').count()
+        in_progress_count = tickets.filter(status='in_progress').count()
+        closed_count = tickets.filter(status='closed').count()
+        stats = {
+            'open': open_count,
+            'in_progress': in_progress_count,
+            'closed': closed_count,
+            'total': tickets.count(),
+            'assigned': Ticket.objects.filter(assigned_to=request.user).count(),
+            'created': Ticket.objects.filter(created_by=request.user).count(),
+        }
 
-def signup_view(request):
-    if request.user.is_authenticated:
-        return redirect('ticket_list')
-
-    if request.method == 'POST':
-        username = request.POST.get('username', '').strip()
-        password = request.POST.get('password', '').strip()
-        if not username or not password:
-            messages.error(request, 'Username and password are required.')
-        else:
-            from django.contrib.auth.models import User
-            if User.objects.filter(username=username).exists():
-                messages.error(request, 'That username is already taken.')
-            else:
-                user = User.objects.create_user(username=username, password=password)
-                login(request, user)
-                messages.success(request, 'Account created successfully.')
-                return redirect('ticket_list')
-
-    return render(request, 'tickets/signup.html')
-
+    recent_tickets = Ticket.objects.select_related('created_by', 'assigned_to').order_by('-created_at')[:5]
+    return render(request, 'tickets/home.html', {'tickets': recent_tickets, 'stats': stats})
 
 def login_view(request):
     if request.user.is_authenticated:
+        return redirect('home')
+
+    error = None
+    if request.method == 'POST':
+        username = request.POST.get('username', '').strip()
+        password = request.POST.get('password', '').strip()
+        action = request.POST.get('action')
+
+        if not username or not password:
+            error = 'Username and password are required.'
+        elif action == 'login':
+            from django.contrib.auth import authenticate
+            user = authenticate(request, username=username, password=password)
+            if user is not None:
+                login(request, user)
+                return redirect('home')
+            error = 'Incorrect username or password.'
+
+    return render(request, 'tickets/login.html', {'error': error})
+
+
+@login_required
+def search(request):
+    query = (request.GET.get('q') or '').strip()
+    selected_status = (request.GET.get('status') or '').strip()
+
+    if _is_admin(request.user):
+        tickets = Ticket.objects.select_related('created_by', 'assigned_to').all().order_by('-created_at')
+    else:
+        tickets = Ticket.objects.select_related('created_by', 'assigned_to').filter(
+            Q(created_by=request.user) | Q(assigned_to=request.user)
+        ).order_by('-created_at')
+
+    if query:
+        tickets = tickets.filter(
+            Q(title__icontains=query) | Q(description__icontains=query)
+        ).order_by('-created_at')
+    if selected_status and selected_status != 'All':
+        tickets = tickets.filter(status=selected_status)
+
+    statuses = [{'name': value, 'label': label} for value, label in Ticket.STATUS_CHOICES]
+    return render(request, 'tickets/search.html', {
+        'tickets': tickets,
+        'query': query,
+        'selected_status': selected_status,
+        'statuses': statuses,
+    })
+
+
+@login_required
+def create_account_view(request):
+    if not _is_admin(request.user):
+        messages.error(request, 'You do not have permission to create accounts.')
         return redirect('ticket_list')
 
-    form = AuthenticationForm(request, data=request.POST or None)
-    if request.method == 'POST' and form.is_valid():
-        login(request, form.get_user())
-        return redirect('ticket_list')
+    if request.method == 'POST':
+        form = CreateAccountForm(request.POST)
+        if form.is_valid():
+            try:
+                create_user_account(
+                    username=form.cleaned_data['username'],
+                    password=form.cleaned_data['password'],
+                    role=form.cleaned_data['role'],
+                )
+                messages.success(request, f"Account '{form.cleaned_data['username']}' created successfully.")
+                return redirect('create_account')
+            except Exception as e:
+                messages.error(request, str(e))
+    else:
+        form = CreateAccountForm()
 
-    return render(request, 'tickets/login.html', {'form': form})
+    return render(request, 'tickets/create_account.html', {'form': form})
 
 
 @login_required
@@ -70,7 +149,15 @@ def ticket_list(request):
         form = TicketCreateForm()
 
     status_filter = request.GET.get('status') or None
-    tickets = list_tickets(status=status_filter)
+    if _is_admin(request.user):
+        tickets = list_tickets(status=status_filter)
+    else:
+        tickets = Ticket.objects.filter(
+            Q(created_by=request.user) | Q(assigned_to=request.user)
+        ).order_by('-created_at')
+        if status_filter:
+            tickets = tickets.filter(status=status_filter)
+
     return render(
         request,
         'tickets/ticket_list.html',
