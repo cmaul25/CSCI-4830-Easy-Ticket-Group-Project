@@ -24,6 +24,7 @@
         .status-in_progress { color: #9a6700; font-weight: bold; }
         .status-closed { color: #1a7f37; font-weight: bold; }
         .actions { display: flex; gap: 10px; align-items: center; }
+        .badge-admin { background: #2563eb; color: white; padding: 2px 8px; border-radius: 4px; font-size: 0.8em; }
         @media (max-width: 800px) { .grid { grid-template-columns: 1fr; } }
     </style>
 </head>
@@ -31,9 +32,15 @@
     <nav>
         <a href="{% url 'ticket_list' %}">Tickets</a>
         <a href="{% url 'account' %}">Account</a>
+        {% if request.user.is_authenticated and request.user.profile.is_admin %}
+            <a href="{% url 'create_account' %}">Create Account</a>
+        {% endif %}
         <div class="spacer"></div>
         {% if request.user.is_authenticated %}
             <span>{{ request.user.username }}</span>
+            {% if request.user.profile.is_admin %}
+                <span class="badge-admin">Admin</span>
+            {% endif %}
             <a href="{% url 'logout' %}">Logout</a>
         {% endif %}
     </nav>

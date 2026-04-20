@@ -16,6 +16,12 @@
         <h2>Your Ticket Stats</h2>
         <p><strong>Tickets you created:</strong> {{ created_count }}</p>
         <p><strong>Tickets assigned to you:</strong> {{ assigned_count }}</p>
+        {% if request.user.profile.is_admin %}
+            <hr style="margin: 16px 0;">
+            <h2>Admin Actions</h2>
+            <p class="muted">Manage user accounts for the system.</p>
+            <a href="{% url 'create_account' %}"><button type="button">Create New Account</button></a>
+        {% endif %}
     </div>
 </div>
 {% endblock %}
