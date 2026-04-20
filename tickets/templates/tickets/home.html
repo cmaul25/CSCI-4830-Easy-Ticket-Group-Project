@@ -1,29 +1,131 @@
 {% extends 'tickets/base.html' %}
 
 {% block content %}
-<section class="card">
-    <h1>Welcome to the Computer Support Ticket System</h1>
-    <p class="muted">Submit and track IT issues through the Easy Ticket dashboard.</p>
-    <div style="display: flex; gap: 12px; margin-top: 16px;">
-        <a href="{% url 'search' %}"><button type="button">Go to Search</button></a>
-        <a href="{% url 'ticket_list' %}"><button type="button">View Tickets</button></a>
-    </div>
-</section>
 
-<section class="card">
-    <h2>Most Recent Tickets</h2>
-    {% if tickets %}
-        {% for ticket in tickets %}
-            <div style="border-bottom: 1px solid #e5e7eb; padding: 12px 0;">
-                <h3 style="margin: 0;">{{ ticket.title }}</h3>
-                <p style="margin: 4px 0;">{{ ticket.description }}</p>
-                <small class="muted">Created: {{ ticket.created_at }}</small><br>
-                <small class="muted">Status: {{ ticket.get_status_display }}</small><br>
-                <a href="{% url 'ticket_detail' ticket.id %}" style="color: #173b63;">View Ticket</a>
-            </div>
-        {% endfor %}
+<h1 style="margin-bottom: 20px;">Dashboard</h1>
+
+<!-- Stat Cards -->
+<div class="grid" style="grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); margin-bottom: 20px;">
+    <div class="card" style="text-align: center;">
+        <p class="muted" style="margin: 0;">Open</p>
+        <h2 style="margin: 8px 0; color: #0550ae;">{{ stats.open }}</h2>
+    </div>
+    <div class="card" style="text-align: center;">
+        <p class="muted" style="margin: 0;">In Progress</p>
+        <h2 style="margin: 8px 0; color: #9a6700;">{{ stats.in_progress }}</h2>
+    </div>
+    <div class="card" style="text-align: center;">
+        <p class="muted" style="margin: 0;">Closed</p>
+        <h2 style="margin: 8px 0; color: #1a7f37;">{{ stats.closed }}</h2>
+    </div>
+    <div class="card" style="text-align: center;">
+        <p class="muted" style="margin: 0;">Total Tickets</p>
+        <h2 style="margin: 8px 0;">{{ stats.total }}</h2>
+    </div>
+    {% if request.user.profile.is_admin %}
+    <div class="card" style="text-align: center;">
+        <p class="muted" style="margin: 0;">Total Users</p>
+        <h2 style="margin: 8px 0;">{{ stats.total_users }}</h2>
+    </div>
     {% else %}
-        <p class="muted">No tickets available.</p>
+    <div class="card" style="text-align: center;">
+        <p class="muted" style="margin: 0;">Assigned to You</p>
+        <h2 style="margin: 8px 0;">{{ stats.assigned }}</h2>
+    </div>
+    <div class="card" style="text-align: center;">
+        <p class="muted" style="margin: 0;">Created by You</p>
+        <h2 style="margin: 8px 0;">{{ stats.created }}</h2>
+    </div>
     {% endif %}
-</section>
+</div>
+
+<!-- Donut Chart and Recent Tickets -->
+<div class="grid">
+    <div class="card" style="display: flex; flex-direction: column; align-items: center;">
+        <h2>Ticket Status</h2>
+        <canvas id="donutChart" width="260" height="260"></canvas>
+        <div style="display: flex; gap: 16px; margin-top: 16px; font-size: 0.9em;">
+            <span style="color: #0550ae;">&#9632; Open</span>
+            <span style="color: #9a6700;">&#9632; In Progress</span>
+            <span style="color: #1a7f37;">&#9632; Closed</span>
+        </div>
+    </div>
+
+    <div class="card">
+        <h2>Most Recent Tickets</h2>
+        {% if tickets %}
+            {% for ticket in tickets %}
+                <div style="border-bottom: 1px solid #e5e7eb; padding: 10px 0;">
+                    <strong>{{ ticket.title }}</strong><br>
+                    <small class="muted">Status:
+                        <span class="status-{{ ticket.status }}">{{ ticket.get_status_display }}</span>
+                    </small><br>
+                    <small class="muted">Created: {{ ticket.created_at|date:"M d, Y" }}</small><br>
+                    <a href="{% url 'ticket_detail' ticket.id %}" style="color: #173b63; font-size: 0.9em;">View Ticket</a>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="muted">No tickets available.</p>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+    const canvas = document.getElementById('donutChart');
+    const ctx = canvas.getContext('2d');
+
+    const data = [{{ stats.open }}, {{ stats.in_progress }}, {{ stats.closed }}];
+    const colors = ['#0550ae', '#9a6700', '#1a7f37'];
+    const total = data.reduce((a, b) => a + b, 0);
+
+    const cx = canvas.width / 2;
+    const cy = canvas.height / 2;
+    const radius = 100;
+    const innerRadius = 55;
+
+    let startAngle = -Math.PI / 2;
+
+    if (total === 0) {
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius, 0, 2 * Math.PI);
+        ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI, true);
+        ctx.fillStyle = '#e5e7eb';
+        ctx.fill();
+
+        ctx.fillStyle = '#666';
+        ctx.font = '14px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('No tickets', cx, cy);
+    } else {
+        data.forEach((value, i) => {
+            if (value === 0) return;
+            const sliceAngle = (value / total) * 2 * Math.PI;
+
+            ctx.beginPath();
+            ctx.moveTo(cx, cy);
+            ctx.arc(cx, cy, radius, startAngle, startAngle + sliceAngle);
+            ctx.closePath();
+            ctx.fillStyle = colors[i];
+            ctx.fill();
+
+            startAngle += sliceAngle;
+        });
+
+        // Cut out the inner circle to make it a donut
+        ctx.beginPath();
+        ctx.arc(cx, cy, innerRadius, 0, 2 * Math.PI);
+        ctx.fillStyle = 'white';
+        ctx.fill();
+
+        // Total in the middle
+        ctx.fillStyle = '#222';
+        ctx.font = 'bold 28px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(total, cx, cy + 5);
+        ctx.font = '13px Arial';
+        ctx.fillStyle = '#666';
+        ctx.fillText('tickets', cx, cy + 22);
+    }
+</script>
+
 {% endblock %}

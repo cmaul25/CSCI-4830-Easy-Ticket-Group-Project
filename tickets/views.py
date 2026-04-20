@@ -21,9 +21,39 @@ def home(request):
     if not request.user.is_authenticated:
         return redirect('login')
 
-    recent_tickets = Ticket.objects.select_related('created_by', 'assigned_to').order_by('-created_at')[:5]
-    return render(request, 'tickets/home.html', {'tickets': recent_tickets})
+    if _is_admin(request.user):
+        tickets = Ticket.objects.all()
+        open_count = tickets.filter(status='open').count()
+        in_progress_count = tickets.filter(status='in_progress').count()
+        closed_count = tickets.filter(status='closed').count()
+        total_count = tickets.count()
+        from django.contrib.auth.models import User
+        total_users = User.objects.count()
+        stats = {
+            'open': open_count,
+            'in_progress': in_progress_count,
+            'closed': closed_count,
+            'total': total_count,
+            'total_users': total_users,
+        }
+    else:
+        tickets = Ticket.objects.filter(
+            Q(created_by=request.user) | Q(assigned_to=request.user)
+        )
+        open_count = tickets.filter(status='open').count()
+        in_progress_count = tickets.filter(status='in_progress').count()
+        closed_count = tickets.filter(status='closed').count()
+        stats = {
+            'open': open_count,
+            'in_progress': in_progress_count,
+            'closed': closed_count,
+            'total': tickets.count(),
+            'assigned': Ticket.objects.filter(assigned_to=request.user).count(),
+            'created': Ticket.objects.filter(created_by=request.user).count(),
+        }
 
+    recent_tickets = Ticket.objects.select_related('created_by', 'assigned_to').order_by('-created_at')[:5]
+    return render(request, 'tickets/home.html', {'tickets': recent_tickets, 'stats': stats})
 
 def login_view(request):
     if request.user.is_authenticated:
