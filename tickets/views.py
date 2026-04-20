@@ -2,42 +2,25 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth import login
+from django.db.models import Q
 from django.http import HttpResponseRedirect
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
 from django.views.decorators.http import require_http_methods
 
-from .forms import AccountForm, TicketCreateForm, TicketEditForm, TicketUpdateForm
+from .forms import AccountForm, CreateAccountForm, TicketCreateForm, TicketEditForm, TicketUpdateForm
 from .models import Ticket
-from .services import add_ticket_update, create_ticket, delete_ticket, list_tickets, update_ticket
+from .services import add_ticket_update, create_ticket, create_user_account, delete_ticket, list_tickets, update_ticket
+
+
+def _is_admin(user):
+    return hasattr(user, 'profile') and user.profile.is_admin
 
 
 def home(request):
     if request.user.is_authenticated:
         return redirect('ticket_list')
     return redirect('login')
-
-
-def signup_view(request):
-    if request.user.is_authenticated:
-        return redirect('ticket_list')
-
-    if request.method == 'POST':
-        username = request.POST.get('username', '').strip()
-        password = request.POST.get('password', '').strip()
-        if not username or not password:
-            messages.error(request, 'Username and password are required.')
-        else:
-            from django.contrib.auth.models import User
-            if User.objects.filter(username=username).exists():
-                messages.error(request, 'That username is already taken.')
-            else:
-                user = User.objects.create_user(username=username, password=password)
-                login(request, user)
-                messages.success(request, 'Account created successfully.')
-                return redirect('ticket_list')
-
-    return render(request, 'tickets/signup.html')
 
 
 def login_view(request):
@@ -50,6 +33,31 @@ def login_view(request):
         return redirect('ticket_list')
 
     return render(request, 'tickets/login.html', {'form': form})
+
+
+@login_required
+def create_account_view(request):
+    if not _is_admin(request.user):
+        messages.error(request, 'You do not have permission to create accounts.')
+        return redirect('ticket_list')
+
+    if request.method == 'POST':
+        form = CreateAccountForm(request.POST)
+        if form.is_valid():
+            try:
+                create_user_account(
+                    username=form.cleaned_data['username'],
+                    password=form.cleaned_data['password'],
+                    role=form.cleaned_data['role'],
+                )
+                messages.success(request, f"Account '{form.cleaned_data['username']}' created successfully.")
+                return redirect('create_account')
+            except Exception as e:
+                messages.error(request, str(e))
+    else:
+        form = CreateAccountForm()
+
+    return render(request, 'tickets/create_account.html', {'form': form})
 
 
 @login_required
@@ -70,7 +78,15 @@ def ticket_list(request):
         form = TicketCreateForm()
 
     status_filter = request.GET.get('status') or None
-    tickets = list_tickets(status=status_filter)
+    if _is_admin(request.user):
+        tickets = list_tickets(status=status_filter)
+    else:
+        tickets = Ticket.objects.filter(
+            Q(created_by=request.user) | Q(assigned_to=request.user)
+        ).order_by('-created_at')
+        if status_filter:
+            tickets = tickets.filter(status=status_filter)
+
     return render(
         request,
         'tickets/ticket_list.html',
