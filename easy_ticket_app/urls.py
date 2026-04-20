@@ -1,4 +1,3 @@
-
 from django.urls import path
 
 from . import views
@@ -16,4 +15,5 @@ urlpatterns = [
     path('tickets/<int:ticket_id>/edit/', ticket_views.ticket_edit, name='ticket_edit'),
     path('tickets/<int:ticket_id>/delete/', ticket_views.ticket_delete, name='ticket_delete'),
     path('account/', ticket_views.account_page, name='account'),
+    path('create-account/', ticket_views.create_account_view, name='create_account'),
 ]
