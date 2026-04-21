@@ -19,9 +19,17 @@ class Test3TicketViewing():
     self.driver.quit()
   
   def test_3TicketViewing(self):
+    self.driver.get("http://18.222.217.197/")
+    self.driver.find_element(By.ID, "username-field").click()
+    self.vars["Testuser"] = self.driver.execute_script("document.querySelector(\'#username-field\').value=\'Testuser\'")
+    self.driver.find_element(By.ID, "password-field").click()
+    self.vars["testtesttest"] = self.driver.execute_script("document.querySelector(\'#password-field\').value=\'testtesttest\'")
+    self.driver.find_element(By.NAME, "action").click()
+    time.sleep(2)
     self.driver.get("http://18.222.217.197/tickets/")
     self.driver.find_element(By.CSS_SELECTOR, "tr:nth-child(3) a").click()
     self.driver.find_element(By.ID, "id_update_text").click()
+    time.sleep(2)
     self.driver.find_element(By.CSS_SELECTOR, "button:nth-child(3)").click()
     time.sleep(10)
   

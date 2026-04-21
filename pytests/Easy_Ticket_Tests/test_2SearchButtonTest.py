@@ -20,6 +20,11 @@ class Test2SearchButtonTest():
   
   def test_2SearchButtonTest(self):
     self.driver.get("http://18.222.217.197/")
+    self.driver.find_element(By.ID, "username-field").click()
+    self.vars["Testuser"] = self.driver.execute_script("document.querySelector(\'#username-field\').value=\'Testuser\'")
+    self.driver.find_element(By.ID, "password-field").click()
+    self.vars["testtesttest"] = self.driver.execute_script("document.querySelector(\'#password-field\').value=\'testtesttest\'")
+    self.driver.find_element(By.NAME, "action").click()
     self.driver.find_element(By.LINK_TEXT, "Search").click()
     time.sleep(5)
   

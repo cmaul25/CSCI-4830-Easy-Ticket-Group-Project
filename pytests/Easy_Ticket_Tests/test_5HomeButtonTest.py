@@ -19,7 +19,15 @@ class Test5HomeButtonTest():
     self.driver.quit()
   
   def test_5HomeButtonTest(self):
+    self.driver.get("http://18.222.217.197/")
+    self.driver.find_element(By.ID, "username-field").click()
+    self.vars["Testuser"] = self.driver.execute_script("document.querySelector(\'#username-field\').value=\'Testuser\'")
+    self.driver.find_element(By.ID, "password-field").click()
+    self.vars["testtesttest"] = self.driver.execute_script("document.querySelector(\'#password-field\').value=\'testtesttest\'")
+    self.driver.find_element(By.NAME, "action").click()
+    time.sleep(2)
     self.driver.get("http://18.222.217.197/account/")
+    time.sleep(2)
     self.driver.find_element(By.LINK_TEXT, "Home").click()
     time.sleep(5)
   

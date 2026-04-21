@@ -19,9 +19,18 @@ class Test10SearchPageAdmin08():
     self.driver.quit()
   
   def test_10SearchPageAdmin08(self):
+    self.driver.get("http://18.222.217.197/")
+    self.driver.set_window_size(1920, 1080)
+    self.driver.find_element(By.ID, "username-field").click()
+    self.vars["Admin_08"] = self.driver.execute_script("document.querySelector(\'#username-field\').value=\'Admin_08\'")
+    self.driver.find_element(By.ID, "password-field").click()
+    self.vars["Pass_eight"] = self.driver.execute_script("document.querySelector(\'#password-field\').value=\'Pass_eight\'")
+    self.driver.find_element(By.NAME, "action").click()
+    time.sleep(2)
     self.driver.get("http://18.222.217.197/search/")
     self.driver.find_element(By.LINK_TEXT, "Search").click()
     self.driver.find_element(By.ID, "q").click()
+    self.vars["help"] = self.driver.execute_script("document.querySelector(\'#q\').value=\'help\'")
     self.driver.find_element(By.CSS_SELECTOR, "button:nth-child(5)").click()
     time.sleep(2)
     self.driver.find_element(By.LINK_TEXT, "View Ticket").click()

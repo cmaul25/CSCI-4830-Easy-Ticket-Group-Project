@@ -22,10 +22,12 @@ class Test8LoginTestAdmin():
     self.driver.get("http://18.222.217.197/")
     self.driver.set_window_size(1920, 1080)
     self.driver.find_element(By.ID, "username-field").click()
+    self.vars["Admin_08"] = self.driver.execute_script("document.querySelector(\'#username-field\').value=\'Admin_08\'")
     self.driver.find_element(By.CSS_SELECTOR, ".button-row").click()
     self.driver.find_element(By.ID, "password-field").click()
     self.driver.find_element(By.CSS_SELECTOR, ".panel").click()
     self.driver.find_element(By.ID, "password-field").click()
+    self.vars["Pass_eight"] = self.driver.execute_script("document.querySelector(\'#password-field\').value=\'Pass_eight\'")
     self.driver.find_element(By.NAME, "action").click()
     time.sleep(10)
   
